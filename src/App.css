@@ -1,0 +1,9 @@
+.mb5 {
+    margin-bottom: 5px;
+}
+.p50 {
+    padding: 50px;
+}
+.grayRow {
+    background-color: #F5F5F5 !important; /* 或者你想要的任何颜色 */
+}
