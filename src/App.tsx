@@ -57,7 +57,7 @@ function App() {
     ];
 
     /**
-     * 数据
+     * 数据内容
      */
     const [dataSource, setDataSource] = useState<Column[]>(initialDataSource);
 
