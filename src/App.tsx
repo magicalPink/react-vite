@@ -1,21 +1,21 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button, Flex, Space, Table, Radio, Modal, Form, Input } from 'antd';
-import type { TableProps, FormProps } from 'antd';
+import type { ColumnsType, TableProps, FormProps } from 'antd';
 import './App.css';
 
-type IColumnType = "CUSTOMIZE" | "FIXED" | "REMARK" | "USER_FILL";
+type IColumnType = 'CUSTOMIZE' | 'FIXED' | 'REMARK' | 'USER_FILL';
 
 interface Column {
     children: Column[] | null;
     id: string;
     level: number;
-    name?: null | string;
+    name: string | null;
     parentId: string;
     title: string | null;
     type: IColumnType;
 }
 
-const disableEnum = {
+const disableEnum: Record<IColumnType, string> = {
     'CUSTOMIZE': '自定义逻辑',
     'FIXED': '系统默认',
     'REMARK': '备注列',
@@ -28,8 +28,8 @@ const initialDataSource: Column[] = [
     { id: "remark", parentId: "-1", children: null, name: null, level: 0, title: "工料概要说明", type: "FIXED" },
 ];
 
-function App() {
-    const columns: TableProps<Column>['columns'] = [
+const App: React.FC = () => {
+    const columns: ColumnsType<Column> = [
         {
             title: '表头名称',
             dataIndex: 'title',
@@ -61,7 +61,7 @@ function App() {
      */
     const [dataSource, setDataSource] = useState<Column[]>(initialDataSource);
 
-    const [modalVo, setModalVo] = useState({
+    const [modalVo, setModalVo] = useState<{ show: boolean, title: string }>({
         show: false,
         title: '新建',
     });
@@ -75,7 +75,7 @@ function App() {
      * @param title 新建or编辑
      *
      */
-    const showModal = (title) => {
+    const showModal = (title: string) => {
         form.resetFields();
         setModalVo({ title, show: true });
     };
@@ -87,9 +87,9 @@ function App() {
     const onFinish: FormProps<Column>['onFinish'] = (values) => {
         if (modalVo.title === '新建') {
             const lastData = dataSource.pop()
-            setDataSource([...dataSource, { level: 1, parentId: '-1', id: Math.random().toString(36).substring(2, 15), ...values },lastData]);
+            setDataSource([...dataSource, { level: 1, parentId: '-1', id: Math.random().toString(36).substring(2, 15), ...values }, lastData]);
         } else if (modalVo.title === '编辑') {
-            const editChild = (data, id) => {
+            const editChild = (data: Column[], id: string): Column[] => {
                 return data.map(item => {
                     if (item.id === id) {
                         return { ...item, ...values };
@@ -100,12 +100,12 @@ function App() {
                     return item;
                 });
             };
-            setDataSource(editChild(dataSource, editData.id));
+            setDataSource(editChild(dataSource, editData!.id));
         } else if (modalVo.title === '新建子级') {
-            const addChild = (data, parentId) => {
+            const addChild = (data: Column[], parentId: string): Column[] => {
                 return data.map(item => {
                     if (item.id === parentId) {
-                        const newChild = { ...values, level: item.level + 1, parentId: item.id, id: Math.random().toString(36).substring(2, 15) };
+                        const newChild: Column = { ...values, level: item.level + 1, parentId: item.id, id: Math.random().toString(36).substring(2, 15) };
                         const children = item.children ? [...item.children, newChild] : [newChild];
                         return { ...item, children };
                     }
@@ -115,10 +115,11 @@ function App() {
                     return item;
                 });
             };
-            setDataSource(addChild(dataSource, editData.id));
+            setDataSource(addChild(dataSource, editData!.id));
         }
         handleCancel();
     };
+
     /**
      * #添加子级
      * @param record
@@ -127,6 +128,7 @@ function App() {
         setEditData({ ...record });
         showModal('新建子级');
     };
+
     /**
      * 修改
      * @param record
@@ -135,12 +137,13 @@ function App() {
         setEditData({ ...record });
         showModal('编辑');
     };
+
     /**
      * 删除
      * @param record
      */
     const remove = (record: Column) => {
-        const removeChild = (data, id) => {
+        const removeChild = (data: Column[], id: string): Column[] => {
             return data.filter(item => {
                 if (item.id === id) {
                     return false;
@@ -187,7 +190,7 @@ function App() {
                         initialValue={'CUSTOMIZE'}
                     >
                         <Radio.Group>
-                            {['CUSTOMIZE', 'REMARK', 'USER_FILL'].map((item) => (
+                            {(['CUSTOMIZE', 'REMARK', 'USER_FILL'] as IColumnType[]).map((item) => (
                                 <Radio key={item} value={item}>
                                     {disableEnum[item]}
                                 </Radio>
